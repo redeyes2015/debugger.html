@@ -74,14 +74,14 @@ describe("getGeneratedLocation", async () => {
     // we expect symmetric mappings, which means that if
     // we map a generated location to an original location,
     // and then map it back, we should get the original generated value.
-    // e.g. G[8, 0] -> O[5, 4] -> G[8, 0]
+    // e.g. G[8, 114] -> O[5, 4] -> G[8, 114]
 
     await setupBundleFixture("if.out");
 
     const genLoc1 = {
       sourceId: "if.out.js",
       column: 0,
-      line: 8
+      line: 114
     };
 
     const ifSource = {
@@ -95,13 +95,13 @@ describe("getGeneratedLocation", async () => {
     expect(genLoc2).toEqual({
       sourceId: "if.out.js",
       column: 0,
-      line: 8
+      line: 114
     });
   });
 
   test("undefined column is handled like 0 column", async () => {
     // we expect that an undefined column will be handled like a
-    // location w/ column 0. e.g. G[8, u] -> O[5, 4] -> G[8, 0]
+    // location w/ column 0. e.g. G[8, u] -> O[5, 4]
 
     await setupBundleFixture("if.out");
 
@@ -111,19 +111,11 @@ describe("getGeneratedLocation", async () => {
       line: 8
     };
 
-    const ifSource = {
-      url: "if.js",
-      id: "if.out.js/originalSource-5ad3141023dae912c5f8833c7e03beeb"
-    };
-
     const oLoc = await getOriginalLocation(genLoc1);
-    const genLoc2 = await getGeneratedLocation(oLoc, ifSource);
-    // console.log(formatLocations([genLoc1, oLoc, genLoc2]));
-
-    expect(genLoc2).toEqual({
-      sourceId: "if.out.js",
-      column: 0,
-      line: 8
+    expect(oLoc).toMatchObject({
+      sourceUrl: "http://example.com/if.js",
+      line: 5,
+      column: 4
     });
   });
 

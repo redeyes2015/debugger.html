@@ -9,6 +9,9 @@ const { getSourceMap, setSourceMap } = require("./sourceMapRequests");
 const { WasmRemap } = require("./wasmRemap");
 const { SourceMapConsumer } = require("source-map");
 const { convertToJSON } = require("./convertToJSON");
+SourceMapConsumer.initialize({
+  "lib/mappings.wasm": "https://unpkg.com/source-map@0.7.2/lib/mappings.wasm"
+});
 
 import type { Source } from "debugger-html";
 
@@ -33,7 +36,9 @@ function _resolveSourceMapURL(source: Source) {
   return { sourceMapURL: resolvedString, baseURL };
 }
 
-async function _resolveAndFetch(generatedSource: Source): SourceMapConsumer {
+async function _resolveAndFetch(
+  generatedSource: Source
+): Promise<SourceMapConsumer> {
   // Fetch the sourcemap over the network and create it.
   const { sourceMapURL, baseURL } = _resolveSourceMapURL(generatedSource);
 
@@ -44,7 +49,7 @@ async function _resolveAndFetch(generatedSource: Source): SourceMapConsumer {
   }
 
   // Create the source map and fix it up.
-  let map = new SourceMapConsumer(fetched.content, baseURL);
+  let map = await new SourceMapConsumer(fetched.content, baseURL);
   if (generatedSource.isWasm) {
     map = new WasmRemap(map);
     // Check if experimental scope info exists.
